@@ -1,6 +1,5 @@
 package com.example.bookface.appuser;
 
-import com.example.bookface.registration.token.ConfirmationToken;
 import com.example.bookface.registration.token.ConfirmationTokenService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,10 +7,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -24,7 +19,9 @@ public class AppUserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return appUserRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND, email)));
+        return appUserRepository
+                .findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND, email)));
     }
 
     public String signUpUser(AppUser appUser) {
@@ -33,24 +30,10 @@ public class AppUserService implements UserDetailsService {
             //TODO resend email if user not verified
             throw new IllegalStateException("email already taken");
         }
-
         String encodedPassword = bCryptPasswordEncoder.encode(appUser.getPassword());
-
         appUser.setPassword(encodedPassword);
-
         appUserRepository.save(appUser);
-
-        String token = UUID.randomUUID().toString();
-        ConfirmationToken confirmationToken = new ConfirmationToken(
-                token,
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(30),
-                appUser
-        );
-
-        confirmationTokenService.saveConfirmationToken(confirmationToken);
-
-        return token;
+        return confirmationTokenService.createAndSaveToken(appUser);
     }
 
     public int enableAppUser(String email) {
