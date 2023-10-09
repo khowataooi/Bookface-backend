@@ -29,6 +29,7 @@ public class PostController {
     public Post createPost(@RequestBody PostRequest postRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
+        System.out.println(email);
         AppUser appUser = appUserRepository
                 .findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
