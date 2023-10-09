@@ -14,7 +14,7 @@ import java.util.List;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping(path = "/api/v1/posts")
+@RequestMapping(path = "/api/posts")
 public class PostController {
     private PostService postService;
     private AppUserRepository appUserRepository;
